@@ -86,7 +86,7 @@ async def check_all_charts():
         pairs_string = ", ".join(positive_setups)
         
         requests.post(
-            f"https://ntfy.sh/{NTFY_TOPIC}", 
+            f"https://ntfy.sh/forex_notification", 
             data=f"Gemini says YES for: {pairs_string}! Check your charts.",
             headers={"Title": "Gemini Breakout Alert", "Priority": "high"}
         )
