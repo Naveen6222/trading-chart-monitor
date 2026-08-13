@@ -8,14 +8,14 @@ from google import genai
 # ==========================================
 # CONFIGURATION
 # ==========================================
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") 
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
     print("Error: GEMINI_API_KEY environment variable not set.")
     sys.exit(1)
 
 # 1. Type the exact word you subscribed to in the ntfy app here
-NTFY_TOPIC = "forex_notification" 
+NTFY_TOPIC = "forex_notification"
 
 # 2. Dictionary containing all 6 of your specific TradingView chart URLs
 CHARTS = {
@@ -55,10 +55,14 @@ async def check_all_charts():
             # Upload to Gemini
             image_file = client.files.upload(file=screenshot_path)
             
-            # Request strict YES/NO analysis
+            # Request strict YES/NO analysis using the Golden Strategy criteria
             prompt = f"""
-            You are a strict technical analysis assistant. Look at this {pair} chart.
-            Does it currently show a highly favorable setup for a breakout?
+            Analyze the provided raw chart solely to identify the Golden Strategy structure. 
+            Respond with YES only if the {pair} chart strictly meets both core structural criteria: 
+            (1) An aggressive, impulsive X-A leg showing strong institutional displacement/momentum, and 
+            (2) A slow, choppy, corrective A-D return that exhausts directly into a key Order Block/Demand-Supply zone near Point D. 
+            
+            If the X-A leg is choppy/weak, the A-D return is overly aggressive, or the structure is ambiguous, respond with NO.
             Answer with ONLY the word "YES" or "NO". Do not provide any other text.
             """
             
@@ -86,7 +90,7 @@ async def check_all_charts():
         pairs_string = ", ".join(positive_setups)
         
         requests.post(
-            f"https://ntfy.sh/forex_notification", 
+            f"https://ntfy.sh/{NTFY_TOPIC}", 
             data=f"Gemini says YES for: {pairs_string}! Check your charts.",
             headers={"Title": "Gemini Breakout Alert", "Priority": "high"}
         )
